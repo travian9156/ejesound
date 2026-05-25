@@ -1,0 +1,1172 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EJE SOUND | Sonido, Streaming y Produccion Audiovisual</title>
+    <meta
+      name="description"
+      content="EJE SOUND: plataforma audiovisual colombiana para rental de sonido, DJ experiences, karaoke premium, streaming, live sessions y produccion audiovisual."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Raleway:wght@700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --purple: #c218ff;
+        --violet: #8a2be2;
+        --deep: #1a1033;
+        --black: #0d0d12;
+        --white: #f5f5f5;
+        --muted: #a7a7b8;
+        --card: rgba(255, 255, 255, 0.045);
+        --line: rgba(255, 255, 255, 0.11);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        font-family: Montserrat, system-ui, sans-serif;
+        background: var(--black);
+        color: var(--white);
+        overflow-x: hidden;
+      }
+      body:before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: -2;
+        background:
+          radial-gradient(
+            circle at 18% 12%,
+            rgba(194, 24, 255, 0.32),
+            transparent 28%
+          ),
+          radial-gradient(
+            circle at 80% 18%,
+            rgba(138, 43, 226, 0.24),
+            transparent 30%
+          ),
+          linear-gradient(180deg, #0d0d12, #07070b);
+      }
+      body:after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: -1;
+        opacity: 0.1;
+        background-image:
+          linear-gradient(to right, #fff 1px, transparent 1px),
+          linear-gradient(to bottom, #fff 1px, transparent 1px);
+        background-size: 72px 72px;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .container {
+        max-width: 1220px;
+        margin: 0 auto;
+        padding: 0 22px;
+      }
+      .nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        backdrop-filter: blur(18px);
+        background: rgba(13, 13, 18, 0.72);
+        border-bottom: 1px solid var(--line);
+      }
+      .nav-inner {
+        height: 78px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+      }
+      .logo-mark {
+        width: 46px;
+        height: 46px;
+        border-radius: 999px;
+        border: 2px solid var(--purple);
+        display: grid;
+        place-items: center;
+        box-shadow: 0 0 34px rgba(194, 24, 255, 0.45);
+        position: relative;
+      }
+      .logo-mark:before,
+      .logo-mark:after {
+        content: "";
+        position: absolute;
+        height: 2px;
+        width: 18px;
+        background: var(--purple);
+        top: 50%;
+      }
+      .logo-mark:before {
+        left: -9px;
+      }
+      .logo-mark:after {
+        right: -9px;
+      }
+      .wave {
+        width: 25px;
+        height: 18px;
+        background: linear-gradient(
+          90deg,
+          transparent 0 7%,
+          var(--white) 7% 12%,
+          transparent 12% 20%,
+          var(--purple) 20% 25%,
+          transparent 25% 33%,
+          var(--white) 33% 38%,
+          transparent 38% 46%,
+          var(--purple) 46% 51%,
+          transparent 51% 59%,
+          var(--white) 59% 64%,
+          transparent 64% 72%,
+          var(--purple) 72% 77%,
+          transparent 77%
+        );
+        clip-path: polygon(
+          0 50%,
+          8% 50%,
+          12% 25%,
+          18% 80%,
+          25% 10%,
+          32% 92%,
+          39% 18%,
+          47% 82%,
+          55% 30%,
+          63% 70%,
+          72% 40%,
+          82% 60%,
+          100% 50%,
+          100% 55%,
+          0 55%
+        );
+      }
+      .logo-text {
+        font-family: Raleway;
+        font-weight: 900;
+        line-height: 0.88;
+        letter-spacing: 0.22em;
+      }
+      .logo-text span {
+        display: block;
+        color: var(--purple);
+      }
+      .nav-links {
+        display: flex;
+        gap: 28px;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .nav-links a:hover {
+        color: white;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        border-radius: 999px;
+        padding: 14px 20px;
+        font-weight: 900;
+        background: var(--purple);
+        box-shadow: 0 0 30px rgba(194, 24, 255, 0.32);
+        transition: 0.25s ease;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+        background: #d64cff;
+      }
+      .btn.alt {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--line);
+        box-shadow: none;
+      }
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        padding: 132px 0 74px;
+      }
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.06fr 0.94fr;
+        gap: 56px;
+        align-items: center;
+      }
+      .eyebrow {
+        display: inline-flex;
+        gap: 10px;
+        align-items: center;
+        border: 1px solid rgba(194, 24, 255, 0.35);
+        background: rgba(194, 24, 255, 0.1);
+        padding: 10px 15px;
+        border-radius: 999px;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 13px;
+        font-weight: 800;
+        margin-bottom: 26px;
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        background: var(--purple);
+        border-radius: 999px;
+        box-shadow: 0 0 18px var(--purple);
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: Raleway;
+        margin: 0;
+      }
+      h1 {
+        font-size: clamp(52px, 8vw, 102px);
+        line-height: 0.91;
+        letter-spacing: -0.06em;
+        font-weight: 900;
+      }
+      .gradient {
+        color: transparent;
+        background: linear-gradient(90deg, var(--purple), var(--violet), #fff);
+        -webkit-background-clip: text;
+        background-clip: text;
+      }
+      .hero p {
+        font-size: 19px;
+        line-height: 1.75;
+        color: rgba(255, 255, 255, 0.7);
+        max-width: 690px;
+      }
+      .hero-actions {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-top: 30px;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-top: 34px;
+      }
+      .stat {
+        border: 1px solid var(--line);
+        background: var(--card);
+        border-radius: 22px;
+        padding: 17px;
+      }
+      .stat strong {
+        display: block;
+        color: var(--purple);
+        font-family: Raleway;
+        font-size: 28px;
+      }
+      .stat span {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.55);
+      }
+      .brand-card {
+        position: relative;
+        border: 1px solid var(--line);
+        background: rgba(0, 0, 0, 0.42);
+        border-radius: 42px;
+        padding: 22px;
+        box-shadow: 0 30px 100px rgba(194, 24, 255, 0.18);
+      }
+      .brand-card:before {
+        content: "";
+        position: absolute;
+        inset: -35px;
+        background: rgba(194, 24, 255, 0.19);
+        filter: blur(55px);
+        z-index: -1;
+        border-radius: 999px;
+      }
+      .brand-inner {
+        min-height: 520px;
+        border-radius: 34px;
+        border: 1px solid rgba(194, 24, 255, 0.36);
+        background:
+          radial-gradient(
+            circle at 50% 25%,
+            rgba(194, 24, 255, 0.3),
+            transparent 42%
+          ),
+          linear-gradient(
+            150deg,
+            rgba(255, 255, 255, 0.08),
+            rgba(255, 255, 255, 0.02)
+          );
+        padding: 30px;
+        overflow: hidden;
+      }
+      .big-orb {
+        width: 245px;
+        height: 245px;
+        border-radius: 999px;
+        border: 10px solid var(--purple);
+        display: grid;
+        place-items: center;
+        margin: 85px auto 62px;
+        box-shadow: 0 0 90px rgba(194, 24, 255, 0.65);
+      }
+      .big-orb .wave {
+        transform: scale(2.6);
+      }
+      .tag-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+      .tag {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 15px;
+        text-align: center;
+        font-weight: 800;
+        font-size: 14px;
+      }
+      section {
+        padding: 92px 0;
+      }
+      .section-top {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 32px;
+        margin-bottom: 36px;
+      }
+      .label {
+        color: var(--purple);
+        font-weight: 900;
+        letter-spacing: 0.42em;
+        text-transform: uppercase;
+        font-size: 12px;
+        margin-bottom: 14px;
+      }
+      h2 {
+        font-size: clamp(38px, 5vw, 66px);
+        line-height: 0.95;
+        letter-spacing: -0.045em;
+      }
+      .lead {
+        color: rgba(255, 255, 255, 0.65);
+        line-height: 1.7;
+        font-size: 17px;
+        max-width: 640px;
+      }
+      .identity,
+      .dark {
+        background: rgba(19, 5, 30, 0.84);
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+      }
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 13px;
+      }
+      .swatch {
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: var(--card);
+        padding: 14px;
+      }
+      .swatch div {
+        height: 78px;
+        border-radius: 16px;
+        margin-bottom: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .swatch b {
+        display: block;
+        font-size: 13px;
+      }
+      .swatch small {
+        color: rgba(255, 255, 255, 0.45);
+      }
+      .filters {
+        display: flex;
+        gap: 10px;
+        overflow: auto;
+        padding-bottom: 18px;
+        margin-bottom: 8px;
+      }
+      .filter {
+        white-space: nowrap;
+        border: 1px solid var(--line);
+        background: var(--card);
+        border-radius: 999px;
+        padding: 12px 18px;
+        color: rgba(255, 255, 255, 0.72);
+        font-weight: 800;
+        cursor: pointer;
+      }
+      .filter.active,
+      .filter:hover {
+        background: var(--purple);
+        border-color: var(--purple);
+        color: white;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+      }
+      .card {
+        border: 1px solid var(--line);
+        background: var(--card);
+        border-radius: 30px;
+        padding: 26px;
+        position: relative;
+        overflow: hidden;
+        transition: 0.25s ease;
+      }
+      .card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(194, 24, 255, 0.72);
+        background: rgba(194, 24, 255, 0.08);
+      }
+      .icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 18px;
+        display: grid;
+        place-items: center;
+        background: rgba(194, 24, 255, 0.15);
+        border: 1px solid rgba(194, 24, 255, 0.3);
+        font-size: 24px;
+        margin-bottom: 18px;
+      }
+      .card h3 {
+        font-size: 24px;
+        margin-bottom: 12px;
+      }
+      .card p {
+        color: rgba(255, 255, 255, 0.62);
+        line-height: 1.65;
+        font-size: 15px;
+      }
+      .chip {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.45);
+        margin-bottom: 15px;
+      }
+      .bullets {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 18px;
+      }
+      .bullets span {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.74);
+      }
+      .bullets span:before {
+        content: "✓";
+        color: var(--purple);
+        font-weight: 900;
+        margin-right: 7px;
+      }
+      .center {
+        text-align: center;
+        max-width: 780px;
+        margin: 0 auto 46px;
+      }
+      .product .tagline {
+        display: inline-block;
+        background: rgba(194, 24, 255, 0.15);
+        border: 1px solid rgba(194, 24, 255, 0.28);
+        color: var(--purple);
+        font-size: 12px;
+        font-weight: 900;
+        border-radius: 999px;
+        padding: 7px 12px;
+        margin-bottom: 18px;
+      }
+      .product ul {
+        padding: 0;
+        margin: 20px 0 0;
+        list-style: none;
+      }
+      .product li {
+        padding: 9px 0;
+        color: rgba(255, 255, 255, 0.72);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      }
+      .sessions-grid,
+      .gear,
+      .contact-grid {
+        display: grid;
+        grid-template-columns: 1fr 0.92fr;
+        gap: 46px;
+        align-items: center;
+      }
+      .video-box {
+        border: 1px solid var(--line);
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 38px;
+        padding: 18px;
+      }
+      .screen {
+        aspect-ratio: 16/10;
+        border-radius: 30px;
+        border: 1px solid rgba(194, 24, 255, 0.3);
+        background: radial-gradient(
+          circle at center,
+          rgba(194, 24, 255, 0.54),
+          #0d0d12 70%
+        );
+        display: grid;
+        place-items: center;
+        font-size: 76px;
+      }
+      .mini-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 12px;
+      }
+      .mini-grid div {
+        text-align: center;
+        background: rgba(255, 255, 255, 0.055);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 14px;
+        font-weight: 800;
+      }
+      .gear-list {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 11px;
+      }
+      .gear-item {
+        border: 1px solid var(--line);
+        background: var(--card);
+        border-radius: 17px;
+        padding: 13px;
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 14px;
+      }
+      .gear-item:before {
+        content: "✓";
+        color: var(--purple);
+        font-weight: 900;
+        margin-right: 8px;
+      }
+      .contact-card {
+        border: 1px solid rgba(194, 24, 255, 0.3);
+        border-radius: 38px;
+        padding: 40px;
+        background: radial-gradient(
+          circle at top left,
+          rgba(194, 24, 255, 0.22),
+          rgba(255, 255, 255, 0.035) 44%
+        );
+      }
+      .contact-links {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-top: 28px;
+      }
+      .contact-links a,
+      .contact-links div {
+        border-radius: 18px;
+        padding: 18px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--line);
+        font-weight: 900;
+      }
+      .contact-links a:first-child {
+        background: var(--purple);
+      }
+      form {
+        border: 1px solid var(--line);
+        background: #0d0d12;
+        border-radius: 38px;
+        padding: 34px;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.06);
+        color: white;
+        border-radius: 17px;
+        padding: 15px 16px;
+        margin-bottom: 12px;
+        font: inherit;
+        outline: none;
+      }
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--purple);
+      }
+      footer {
+        padding: 34px 0;
+        border-top: 1px solid var(--line);
+        background: #0d0d12;
+        color: rgba(255, 255, 255, 0.48);
+      }
+      .footer-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+      }
+      .float-wa {
+        position: fixed;
+        right: 22px;
+        bottom: 22px;
+        z-index: 99;
+        width: 58px;
+        height: 58px;
+        border-radius: 999px;
+        background: #25d366;
+        display: grid;
+        place-items: center;
+        font-size: 28px;
+        box-shadow: 0 10px 38px rgba(37, 211, 102, 0.34);
+      }
+      @media (max-width: 960px) {
+        .hero-grid,
+        .sessions-grid,
+        .gear,
+        .contact-grid {
+          grid-template-columns: 1fr;
+        }
+        .grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .nav-links {
+          display: none;
+        }
+        .stats,
+        .swatches {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 640px) {
+        .grid,
+        .gear-list,
+        .contact-links,
+        .stats,
+        .swatches {
+          grid-template-columns: 1fr;
+        }
+        .hero {
+          padding-top: 108px;
+        }
+        .brand-inner {
+          min-height: 430px;
+        }
+        .big-orb {
+          width: 190px;
+          height: 190px;
+          margin: 60px auto 38px;
+        }
+        .tag-grid {
+          grid-template-columns: 1fr;
+        }
+        section {
+          padding: 68px 0;
+        }
+        .footer-inner {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- NAVBAR -->
+    <header class="nav">
+      <div class="container nav-inner">
+        <a class="logo" href="#inicio"
+          ><div class="logo-mark"><div class="wave"></div></div>
+          <div class="logo-text">EJE <span>SOUND</span></div></a
+        >
+        <nav class="nav-links">
+          <a href="#servicios">Servicios</a><a href="#paquetes">Paquetes</a
+          ><a href="#sessions">Sessions</a><a href="#inventario">Inventario</a
+          ><a href="#contacto">Contacto</a>
+        </nav>
+        <a
+          class="btn"
+          href="https://wa.me/573126919143?text=Hola%20EJE%20SOUND,%20quiero%20cotizar"
+          target="_blank"
+          >Cotizar</a
+        >
+      </div>
+    </header>
+
+    <main>
+      <!-- HERO PRINCIPAL -->
+      <section id="inicio" class="hero">
+        <div class="container hero-grid">
+          <div>
+            <div class="eyebrow">
+              <span class="dot"></span> Plataforma audiovisual colombiana
+            </div>
+            <h1>
+              Sonido. Streaming. Cultura. <span class="gradient">Impacto.</span>
+            </h1>
+            <p>
+              EJE SOUND produce experiencias sonoras y audiovisuales para
+              eventos, artistas emergentes, marcas, DJs y comunidades creativas.
+              No solo montamos equipos: diseñamos momentos que se viven en vivo
+              y se amplifican en digital.
+            </p>
+            <div class="hero-actions">
+              <a class="btn" href="#servicios">Explorar servicios</a
+              ><a class="btn alt" href="#sessions">Ver EJE Sessions</a>
+            </div>
+            <div class="stats">
+              <div class="stat">
+                <strong>360°</strong><span>Sonido + visual + contenido</span>
+              </div>
+              <div class="stat">
+                <strong>JBL</strong><span>Sistema principal</span>
+              </div>
+              <div class="stat">
+                <strong>LIVE</strong><span>Streaming y sessions</span>
+              </div>
+              <div class="stat">
+                <strong>COL</strong><span>Proyeccion nacional</span>
+              </div>
+            </div>
+          </div>
+          <div class="brand-card">
+            <div class="brand-inner">
+              <div class="logo">
+                <div class="logo-mark"><div class="wave"></div></div>
+                <div class="logo-text">EJE <span>SOUND</span></div>
+              </div>
+              <div class="big-orb"><div class="wave"></div></div>
+              <div class="tag-grid">
+                <div class="tag">Rental</div>
+                <div class="tag">Streaming</div>
+                <div class="tag">Sessions</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SERVICIOS -->
+      <section id="servicios">
+        <div class="container">
+          <div class="section-top">
+            <div>
+              <div class="label">Servicios</div>
+              <h2>Lo que vendemos</h2>
+            </div>
+            <p class="lead">
+              Frentes comerciales rentables hoy, escalables mañana y diseñados
+              para posicionar EJE SOUND como plataforma audiovisual de alto
+              nivel en Colombia.
+            </p>
+          </div>
+          <div class="filters">
+            <button class="filter active" data-filter="Todos">Todos</button
+            ><button class="filter" data-filter="Rental">Rental</button
+            ><button class="filter" data-filter="DJ">DJ</button
+            ><button class="filter" data-filter="Eventos">Eventos</button
+            ><button class="filter" data-filter="Live">Live</button
+            ><button class="filter" data-filter="Contenido">Contenido</button
+            ><button class="filter" data-filter="Artistas">Artistas</button>
+          </div>
+          <div class="grid" id="serviceGrid"></div>
+        </div>
+      </section>
+      <!-- PAQUETES -->
+      <section id="paquetes" class="dark">
+        <div class="container">
+          <div class="center">
+            <div class="label">Productos comerciales</div>
+            <h2>Paquetes listos para vender</h2>
+            <p class="lead">
+              Nombres profesionales para Instagram, cotizaciones, WhatsApp
+              Business y pagina web.
+            </p>
+          </div>
+          <div class="grid" id="productGrid"></div>
+        </div>
+      </section>
+      <!-- EJE SESSIONS -->
+      <section id="sessions">
+        <div class="container sessions-grid">
+          <div>
+            <div class="label">Proyecto bandera</div>
+            <h2>EJE Sessions: artistas emergentes con factura pro.</h2>
+            <p class="lead">
+              Formato propio para grabar artistas, DJs y proyectos creativos.
+              Cada sesion puede generar video principal, reels, fotos, clips
+              verticales, streaming y material para crowdfunding o monetizacion
+              digital.
+            </p>
+            <div class="bullets" style="margin-top: 24px">
+              <span>Live performance</span><span>DJ set cinematografico</span
+              ><span>Reels para lanzamiento</span
+              ><span>Crowdfunding creativo</span
+              ><span>Difusion en comunidad</span
+              ><span>Portafolio artistico</span>
+            </div>
+          </div>
+          <div class="video-box">
+            <div class="screen">▶</div>
+            <div class="mini-grid">
+              <div>Audio</div>
+              <div>Video</div>
+              <div>Redes</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- INVENTARIO -->
+      <section id="inventario" class="dark">
+        <div class="container gear">
+          <div>
+            <div class="label">Backline inicial</div>
+            <h2>Equipo real para operar desde ya.</h2>
+            <p class="lead">
+              La confianza comercial se construye mostrando capacidad. Este
+              inventario comunica que EJE SOUND no es una idea: es una operacion
+              lista para producir.
+            </p>
+          </div>
+          <div class="gear-list" id="gearList"></div>
+        </div>
+      </section>
+      <!-- PROCESO / COMO TRABAJAMOS -->
+      <section>
+        <div class="container grid">
+          <div class="card">
+            <div class="icon">📅</div>
+            <h3>Planeacion</h3>
+            <p>
+              Entendemos tu evento, espacio, publico, horarios, objetivos y
+              necesidades tecnicas.
+            </p>
+          </div>
+          <div class="card">
+            <div class="icon">⚡</div>
+            <h3>Produccion</h3>
+            <p>
+              Montamos sonido, luces, audio, camara, streaming y operacion
+              tecnica con estetica EJE.
+            </p>
+          </div>
+          <div class="card">
+            <div class="icon">✨</div>
+            <h3>Contenido</h3>
+            <p>
+              Convertimos la experiencia en piezas para redes, marca, portafolio
+              y monetizacion digital.
+            </p>
+          </div>
+        </div>
+      </section>
+      <!-- CONTACTO -->
+      <section id="contacto" class="dark">
+        <div class="container contact-grid">
+          <div class="contact-card">
+            <div class="label">Contacto</div>
+            <h2>Hagamos que tu evento se vea y suene grande.</h2>
+            <p class="lead">
+              Cuentanos que quieres producir: evento, DJ set, karaoke, live
+              session, streaming, contenido para redes o desarrollo artistico.
+            </p>
+            <div class="contact-links">
+              <a
+                href="https://wa.me/573126919143?text=Hola%20EJE%20SOUND,%20quiero%20cotizar"
+                target="_blank"
+                >WhatsApp</a
+              ><a href="mailto:info@ejesound.co">info@ejesound.co</a
+              ><a href="https://instagram.com/ejesound.co" target="_blank"
+                >@ejesound.co</a
+              >
+              <div>Colombia</div>
+            </div>
+          </div>
+          <form onsubmit="sendWhatsApp(event)">
+            <h3>Solicita una cotizacion</h3>
+            <p class="lead" style="font-size: 14px">
+              Este formulario abre WhatsApp con los datos listos.
+            </p>
+            <input id="name" placeholder="Nombre / empresa" required /><input
+              id="contact"
+              placeholder="WhatsApp o email"
+              required
+            /><select id="service">
+              <option>Rental de sonido</option>
+              <option>DJ experience</option>
+              <option>Karaoke premium</option>
+              <option>Streaming</option>
+              <option>EJE Session</option>
+              <option>Produccion audiovisual</option>
+              <option>Desarrollo artistico</option></select
+            ><textarea
+              id="message"
+              placeholder="Fecha, ciudad, tipo de evento, aforo y objetivo."
+            ></textarea
+            ><button
+              class="btn"
+              style="width: 100%; border: 0; cursor: pointer"
+              type="submit"
+            >
+              Enviar solicitud por WhatsApp
+            </button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <a
+      class="float-wa"
+      href="https://wa.me/573126919143?text=Hola%20EJE%20SOUND,%20quiero%20cotizar"
+      target="_blank"
+      >☘</a
+    >
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="container footer-inner">
+        <div class="logo">
+          <div class="logo-mark"><div class="wave"></div></div>
+          <div class="logo-text">EJE <span>SOUND</span></div>
+        </div>
+        <div>
+          <p>© 2026 EJE SOUND. Crea. Conecta. Impulsa.</p>
+          <p>
+            Sonido · Streaming · Produccion audiovisual · Experiencias ·
+            Colombia
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- JS: filtros, paquetes, inventario y WhatsApp -->
+    <script>
+      const services = [
+        [
+          "🔊",
+          "Rental",
+          "Rental de sonido profesional",
+          "Sistemas JBL para eventos sociales, corporativos, fiestas privadas, activaciones comerciales, shows en vivo y experiencias musicales.",
+          ["PA principal", "Subwoofer activo", "Operacion tecnica", "Montaje"],
+        ],
+        [
+          "🎧",
+          "DJ",
+          "DJ experiences",
+          "Musicalizacion profesional, DJ set, fiestas tematicas, warmups, after parties y experiencias sonoras con estetica visual.",
+          [
+            "Controlador Pioneer",
+            "Curaduria musical",
+            "Ambiente club",
+            "Contenido redes",
+          ],
+        ],
+        [
+          "🎤",
+          "Eventos",
+          "Karaoke premium",
+          "Karaoke con sonido profesional, luces, hosting, grabacion de momentos y experiencia social de alto impacto.",
+          ["Microfonos", "Letras en pantalla", "Luces", "Reels"],
+        ],
+        [
+          "📡",
+          "Live",
+          "Streaming en vivo",
+          "Transmisiones para DJs, artistas, conversatorios, lanzamientos, podcasts, eventos privados y sesiones musicales.",
+          ["OBS", "Audio limpio", "Iluminacion", "Salida a redes"],
+        ],
+        [
+          "🎥",
+          "Contenido",
+          "Produccion audiovisual",
+          "Grabacion de reels, videoclips basicos, aftermovies, contenido vertical, entrevistas y capsulas promocionales.",
+          ["Video vertical", "Edicion", "Color look", "Entrega digital"],
+        ],
+        [
+          "🎬",
+          "Artistas",
+          "EJE Sessions",
+          "Sesiones audiovisuales para artistas emergentes: performance en vivo, grabacion, contenido, difusion y comunidad.",
+          ["Live session", "Reels", "Fotos", "Publicacion cruzada"],
+        ],
+        [
+          "🎓",
+          "Artistas",
+          "Formacion artistica y DJ",
+          "Acompanamiento para aprender DJ, performance, presencia escenica, creacion de contenido y fundamentos musicales.",
+          ["DJ basico", "Performance", "Voz y escena", "Marca personal"],
+        ],
+        [
+          "👥",
+          "Artistas",
+          "Desarrollo de artistas emergentes",
+          "Ruta para artistas: identidad visual, contenido, showcases, networking, booking y estrategia de lanzamiento.",
+          ["Imagen", "Portafolio", "Booking", "Estrategia digital"],
+        ],
+        [
+          "💡",
+          "Eventos",
+          "Iluminacion escenica",
+          "Ambientes con barras LED, estetica morada EJE, look cinematografico y puesta visual para grabaciones.",
+          ["LED bars", "Mood visual", "Escena", "Brand look"],
+        ],
+        [
+          "🚚",
+          "Rental",
+          "Montaje, transporte y operacion",
+          "Planeacion tecnica, transporte, cableado, distribucion electrica, montaje seguro y acompanamiento durante el evento.",
+          ["Transporte", "Distro electrica", "Cableado", "Soporte tecnico"],
+        ],
+        [
+          "📣",
+          "Contenido",
+          "Contenido para negocios y marcas",
+          "Piezas audiovisuales para restaurantes, bares, emprendimientos, marcas locales, lanzamientos y activaciones.",
+          ["Reels comerciales", "Aftermovie", "Pauta", "Brand content"],
+        ],
+        [
+          "🪄",
+          "Eventos",
+          "Diseno de experiencias culturales",
+          "Conceptualizacion de eventos propios, showcases, noches de karaoke, sesiones DJ y activaciones culturales.",
+          ["Concepto", "Curaduria", "Produccion", "Comunidad"],
+        ],
+      ];
+      const products = [
+        [
+          "EJE Social Sound",
+          "Eventos privados",
+          "Sonido profesional para cumpleanos, reuniones, celebraciones, empresas y espacios sociales.",
+          [
+            "2 cabinas JBL",
+            "Consola Yamaha",
+            "Operador tecnico",
+            "Montaje basico",
+          ],
+        ],
+        [
+          "EJE Club Night",
+          "DJ + luces",
+          "Experiencia tipo club para fiestas privadas, bares, rooftops y activaciones con DJ set.",
+          ["DJ setup", "Sistema JBL", "Barras LED", "Contenido corto"],
+        ],
+        [
+          "EJE Karaoke Pro",
+          "Karaoke premium",
+          "Una noche de karaoke con estetica pro, sonido real y contenido para que el evento viva tambien en redes.",
+          ["Microfonos", "Pantalla/proyeccion*", "Luces", "Host opcional"],
+        ],
+        [
+          "EJE Live Session",
+          "Artistas emergentes",
+          "Grabacion en vivo para cantantes, DJs, bandas pequenas y proyectos musicales emergentes.",
+          ["Audio directo", "Camara", "Luces", "Reels + video base"],
+        ],
+        [
+          "EJE Streaming Pack",
+          "Transmision",
+          "Produccion y emision en vivo para sesiones musicales, podcasts, lanzamientos y eventos.",
+          ["OBS", "Audio limpio", "Camara", "Configuracion de plataforma"],
+        ],
+        [
+          "EJE Artist Boost",
+          "Desarrollo artistico",
+          "Paquete de imagen, contenido y estrategia para artistas que quieren verse serios desde el primer lanzamiento.",
+          ["Perfil artistico", "Fotos/video", "Reels", "Plan de publicacion"],
+        ],
+      ];
+      const gear = [
+        "Consola Yamaha MG10XU",
+        "Subwoofer JBL JRX118SP activo",
+        "2 cabinas JBL 515XT",
+        "2 cabinas JBL EON 615",
+        "Controlador Pioneer DDJ-FLX2",
+        "Camara Panasonic FZ300",
+        "Interfaz Behringer UMC202HD",
+        "Microfono Behringer C1",
+        "PC gamer para edicion/streaming",
+        "Distro de corriente",
+        "Extensiones encauchetadas certificadas",
+        "Barras LED Philips DMX/XLR",
+        "Disponibilidad de camion Dongfeng Capitan W",
+      ];
+      function renderServices(filter = "Todos") {
+        document.getElementById("serviceGrid").innerHTML = services
+          .filter((s) => filter === "Todos" || s[1] === filter)
+          .map(
+            (s) =>
+              `<article class="card"><div class="icon">${s[0]}</div><span class="chip">${s[1]}</span><h3>${s[2]}</h3><p>${s[3]}</p><div class="bullets">${s[4].map((b) => `<span>${b}</span>`).join("")}</div></article>`,
+          )
+          .join("");
+      }
+      document.querySelectorAll(".filter").forEach((btn) =>
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll(".filter")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          renderServices(btn.dataset.filter);
+        }),
+      );
+      document.getElementById("productGrid").innerHTML = products
+        .map(
+          (p) =>
+            `<article class="card product"><span class="tagline">${p[1]}</span><h3>${p[0]}</h3><p>${p[2]}</p><ul>${p[3].map((i) => `<li>${i}</li>`).join("")}</ul><a class="btn alt" style="margin-top:22px" href="https://wa.me/573126919143?text=Hola%20EJE%20SOUND,%20quiero%20cotizar%20${encodeURIComponent(p[0])}" target="_blank">Cotizar paquete</a></article>`,
+        )
+        .join("");
+      document.getElementById("gearList").innerHTML = gear
+        .map((g) => `<div class="gear-item">${g}</div>`)
+        .join("");
+      renderServices();
+      function sendWhatsApp(e) {
+        e.preventDefault();
+        const name = document.getElementById("name").value;
+        const contact = document.getElementById("contact").value;
+        const service = document.getElementById("service").value;
+        const msg = document.getElementById("message").value;
+        const text = `Hola EJE SOUND, quiero cotizar.%0A%0ANombre: ${encodeURIComponent(name)}%0AContacto: ${encodeURIComponent(contact)}%0AServicio: ${encodeURIComponent(service)}%0ADetalles: ${encodeURIComponent(msg)}`;
+        window.open(`https://wa.me/573126919143?text=${text}`, "_blank");
+      }
+    </script>
+  </body>
+</html>
