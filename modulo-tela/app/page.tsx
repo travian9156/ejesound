@@ -35,17 +35,34 @@ type Roll = {
   status: string;
 };
 
+type Layer = {
+  number: number;
+  status: "pending" | "ok" | "warning";
+  roll: string;
+  consumed: boolean;
+  discardCode?: string;
+};
+
 type Discard = {
   code: string;
   rollCode: string;
   supplier: string;
   fabric: string;
   color: string;
+  layerNumber: number;
   defect: string;
   defectiveMeters: number;
   sacrificedMeters: number;
   totalMeters: number;
   status: string;
+};
+
+type RollEvent = {
+  id: string;
+  type: string;
+  rollCode: string;
+  detail: string;
+  meters: number;
 };
 
 const initialRolls: Roll[] = [
@@ -125,19 +142,27 @@ function nextCode(prefix: string, total: number) {
   return `${prefix}-${String(total + 1).padStart(4, "0")}`;
 }
 
+function rollStatus(balance: number, layerLength = 5) {
+  if (balance <= 0) return "Agotado";
+  if (balance < layerLength * 2) return "Remanente";
+  return "Disponible";
+}
+
 export default function Page() {
   const [rolls, setRolls] = useState<Roll[]>(initialRolls);
   const [discards, setDiscards] = useState<Discard[]>([]);
+  const [events, setEvents] = useState<RollEvent[]>([]);
   const [activeTab, setActiveTab] = useState("corte");
   const [activeRollCode, setActiveRollCode] = useState("TEL-0009");
   const [selectedDefect, setSelectedDefect] = useState("Raya");
   const [defectiveMeters, setDefectiveMeters] = useState(4);
   const [activeLayer, setActiveLayer] = useState(1);
-  const [layers, setLayers] = useState(() =>
+  const [layers, setLayers] = useState<Layer[]>(() =>
     Array.from({ length: 10 }, (_, index) => ({
       number: index + 1,
-      status: index < 2 ? "ok" : "pending",
+      status: "pending",
       roll: index < 2 ? "TEL-0009" : "TEL-0021",
+      consumed: false,
     })),
   );
 
@@ -164,8 +189,11 @@ export default function Page() {
 
   const activeRoll =
     rolls.find((roll) => roll.code === activeRollCode) || rolls[0];
+  const selectedLayer =
+    layers.find((layer) => layer.number === activeLayer) || layers[0];
   const checkedLayers = layers.filter((layer) => layer.status === "ok").length;
-  const consumedMeters = checkedLayers * trace.length;
+  const consumedMeters =
+    layers.filter((layer) => layer.consumed).length * trace.length;
   const totalRequired = trace.length * trace.plannedLayers;
   const goodMetersToSacrifice = Math.max(
     activeRoll.policyMin - defectiveMeters,
@@ -179,11 +207,11 @@ export default function Page() {
     0,
   );
   const remnantCount = rolls.filter(
-    (roll) => roll.balance > 0 && roll.balance < 12,
+    (roll) => roll.balance > 0 && roll.balance < trace.length * 2,
   ).length;
 
   const recommendations = useMemo(() => {
-    let remaining = totalRequired;
+    let remaining = totalRequired - consumedMeters;
     return rolls
       .filter(
         (roll) =>
@@ -203,7 +231,37 @@ export default function Page() {
           remainingAfter: roll.balance - metersToUse,
         };
       });
-  }, [rolls, totalRequired]);
+  }, [rolls, totalRequired, consumedMeters]);
+
+  function addEvent(
+    type: string,
+    rollCode: string,
+    detail: string,
+    meters: number,
+  ) {
+    const event: RollEvent = {
+      id: nextCode("EVT", events.length),
+      type,
+      rollCode,
+      detail,
+      meters,
+    };
+    setEvents((prev) => [event, ...prev]);
+  }
+
+  function adjustRollBalance(rollCode: string, deltaMeters: number) {
+    setRolls((prev) =>
+      prev.map((roll) => {
+        if (roll.code !== rollCode) return roll;
+        const newBalance = Math.max(roll.balance + deltaMeters, 0);
+        return {
+          ...roll,
+          balance: newBalance,
+          status: rollStatus(newBalance, trace.length),
+        };
+      }),
+    );
+  }
 
   function updateReceipt(field: string, value: string | number) {
     setReceipt((prev) => ({ ...prev, [field]: value }));
@@ -225,32 +283,123 @@ export default function Page() {
       balance: expectedMeters,
       cost: Number(receipt.cost),
       policyMin: supplierPolicies[supplier] || 15,
-      status: "Disponible",
+      status: rollStatus(expectedMeters, trace.length),
     };
 
     setRolls((prev) => [newRoll, ...prev]);
     setActiveRollCode(newRoll.code);
     setActiveTab("inventario");
+    addEvent(
+      "Recepcion",
+      newRoll.code,
+      "Rollo creado desde factura",
+      expectedMeters,
+    );
   }
 
-  function markLayer(number: number, status: string) {
+  function markLayer(number: number, nextStatus: "ok" | "warning") {
+    const current = layers.find((layer) => layer.number === number);
+    if (!current) return;
+
     setActiveLayer(number);
-    setLayers((prev) =>
-      prev.map((layer) =>
-        layer.number === number
-          ? { ...layer, status, roll: activeRollCode }
-          : layer,
-      ),
+
+    if (nextStatus === "ok") {
+      if (activeRoll.balance < trace.length && !current.consumed) {
+        alert(
+          `El rollo ${activeRoll.code} no tiene saldo suficiente para una capa de ${trace.length} m.`,
+        );
+        return;
+      }
+
+      if (!current.consumed) {
+        adjustRollBalance(activeRollCode, -trace.length);
+        addEvent(
+          "Consumo capa",
+          activeRollCode,
+          `Capa ${number} marcada OK`,
+          trace.length,
+        );
+      }
+
+      setLayers((prev) =>
+        prev.map((layer) =>
+          layer.number === number
+            ? { ...layer, status: "ok", roll: activeRollCode, consumed: true }
+            : layer,
+        ),
+      );
+      return;
+    }
+
+    if (nextStatus === "warning") {
+      if (current.consumed) {
+        adjustRollBalance(current.roll, trace.length);
+        addEvent(
+          "Reversa capa",
+          current.roll,
+          `Capa ${number} paso de OK a novedad`,
+          -trace.length,
+        );
+      }
+
+      setLayers((prev) =>
+        prev.map((layer) =>
+          layer.number === number
+            ? {
+                ...layer,
+                status: "warning",
+                roll: activeRollCode,
+                consumed: false,
+              }
+            : layer,
+        ),
+      );
+    }
+  }
+
+  function cycleRoll() {
+    const usableRolls = rolls.filter(
+      (roll) =>
+        roll.fabric === trace.fabric &&
+        roll.color === trace.color &&
+        roll.balance >= trace.length &&
+        roll.code !== activeRollCode,
+    );
+
+    if (usableRolls.length === 0) {
+      alert(
+        "No hay otro rollo compatible con saldo suficiente para este trazo.",
+      );
+      return;
+    }
+
+    const nextRoll = usableRolls.sort((a, b) => a.balance - b.balance)[0];
+    setActiveRollCode(nextRoll.code);
+    addEvent(
+      "Cambio rollo",
+      nextRoll.code,
+      `Rollo montado para continuar ${trace.code}`,
+      0,
     );
   }
 
   function generateDiscard() {
+    if (!selectedLayer) return;
+
+    if (activeRoll.balance < totalIsolation) {
+      alert(
+        `El rollo ${activeRoll.code} no tiene saldo suficiente para aislar ${totalIsolation} m.`,
+      );
+      return;
+    }
+
     const discard: Discard = {
       code: nextCode("DES", discards.length),
       rollCode: activeRoll.code,
       supplier: activeRoll.supplier,
       fabric: activeRoll.fabric,
       color: activeRoll.color,
+      layerNumber: activeLayer,
       defect: selectedDefect,
       defectiveMeters,
       sacrificedMeters: goodMetersToSacrifice,
@@ -259,20 +408,28 @@ export default function Page() {
     };
 
     setDiscards((prev) => [discard, ...prev]);
-    setRolls((prev) =>
-      prev.map((roll) =>
-        roll.code === activeRoll.code
+    adjustRollBalance(activeRoll.code, -totalIsolation);
+    addEvent(
+      "Descarte",
+      activeRoll.code,
+      `DES generado en capa ${activeLayer}`,
+      totalIsolation,
+    );
+
+    setLayers((prev) =>
+      prev.map((layer) =>
+        layer.number === activeLayer
           ? {
-              ...roll,
-              balance: Math.max(roll.balance - totalIsolation, 0),
-              status:
-                Math.max(roll.balance - totalIsolation, 0) <= 0
-                  ? "Agotado"
-                  : roll.status,
+              ...layer,
+              status: "warning",
+              roll: activeRoll.code,
+              consumed: false,
+              discardCode: discard.code,
             }
-          : roll,
+          : layer,
       ),
     );
+
     setActiveTab("cambios");
   }
 
@@ -569,6 +726,10 @@ export default function Page() {
                     label="Consumo requerido"
                     value={`${totalRequired} m`}
                   />
+                  <Info
+                    label="Consumo registrado"
+                    value={`${consumedMeters} m`}
+                  />
                 </Card>
 
                 <Card title="Rollo montado" icon={Warehouse} badge="QR activo">
@@ -603,6 +764,34 @@ export default function Page() {
                     {activeRoll.policyMin} metros.
                   </div>
                 </Card>
+
+                <Card
+                  title="Eventos del trazo"
+                  icon={RefreshCw}
+                  badge={`${events.length} eventos`}
+                >
+                  {events.length === 0 ? (
+                    <p className="text-sm text-slate-500">
+                      Aun no hay eventos registrados.
+                    </p>
+                  ) : (
+                    <div className="max-h-64 space-y-2 overflow-y-auto">
+                      {events.map((event) => (
+                        <div
+                          key={event.id}
+                          className="rounded-xl bg-slate-50 p-3 text-sm"
+                        >
+                          <p className="font-black text-[#102052]">
+                            {event.type} · {event.rollCode}
+                          </p>
+                          <p className="text-slate-500">
+                            {event.detail} · {event.meters} m
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </Card>
               </div>
 
               <div className="space-y-6">
@@ -621,7 +810,7 @@ export default function Page() {
                             layer.status === "ok" ? "warning" : "ok",
                           )
                         }
-                        className={`min-h-[105px] rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 ${layer.status === "ok" ? "border-emerald-200 bg-emerald-50" : layer.status === "warning" ? "border-amber-200 bg-amber-50" : "border-slate-200 bg-white"}`}
+                        className={`min-h-[112px] rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 ${layer.status === "ok" ? "border-emerald-200 bg-emerald-50" : layer.status === "warning" ? "border-amber-200 bg-amber-50" : "border-slate-200 bg-white"}`}
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-black">
@@ -640,6 +829,16 @@ export default function Page() {
                           Rollo
                         </p>
                         <p className="font-bold text-[#102052]">{layer.roll}</p>
+                        {layer.discardCode && (
+                          <p className="mt-1 text-xs font-black text-amber-700">
+                            {layer.discardCode}
+                          </p>
+                        )}
+                        {layer.consumed && (
+                          <p className="mt-1 text-xs text-emerald-700">
+                            -{trace.length} m descontados
+                          </p>
+                        )}
                       </button>
                     ))}
                   </div>
@@ -656,7 +855,10 @@ export default function Page() {
                     >
                       Registrar novedad
                     </button>
-                    <button className="rounded-2xl bg-[#ff3f9d] px-4 py-3 text-sm font-black text-white">
+                    <button
+                      onClick={cycleRoll}
+                      className="rounded-2xl bg-[#ff3f9d] px-4 py-3 text-sm font-black text-white"
+                    >
                       Cambiar rollo
                     </button>
                   </div>
@@ -666,7 +868,7 @@ export default function Page() {
                   <Card
                     title="Defectos rapidos"
                     icon={ShieldAlert}
-                    badge="Grid operario"
+                    badge={`Capa ${activeLayer}`}
                   >
                     <div className="grid grid-cols-2 gap-2">
                       {defects.map((defect) => (
@@ -691,6 +893,7 @@ export default function Page() {
                       className="mt-2 w-full rounded-2xl border border-slate-200 p-3 outline-none focus:border-[#ff3f9d]"
                     />
                     <div className="mt-4 rounded-2xl bg-rose-50 p-4 text-sm">
+                      <Info label="Capa afectada" value={`${activeLayer}`} />
                       <Info
                         label="Defecto real"
                         value={`${defectiveMeters} m`}
@@ -766,6 +969,7 @@ export default function Page() {
                       <tr className="border-b text-xs font-black tracking-[0.2em] text-slate-400">
                         <th className="py-3">Codigo</th>
                         <th>Rollo</th>
+                        <th>Capa</th>
                         <th>Proveedor</th>
                         <th>Tela</th>
                         <th>Color</th>
@@ -786,6 +990,7 @@ export default function Page() {
                             {item.code}
                           </td>
                           <td>{item.rollCode}</td>
+                          <td>{item.layerNumber}</td>
                           <td>{item.supplier}</td>
                           <td>{item.fabric}</td>
                           <td>{item.color}</td>
@@ -808,10 +1013,18 @@ export default function Page() {
           )}
 
           {activeTab === "dashboard" && (
-            <DashboardSummary rolls={rolls} discards={discards} />
+            <DashboardSummary
+              rolls={rolls}
+              discards={discards}
+              events={events}
+            />
           )}
           {activeTab === "reportes" && (
-            <DashboardSummary rolls={rolls} discards={discards} />
+            <DashboardSummary
+              rolls={rolls}
+              discards={discards}
+              events={events}
+            />
           )}
         </div>
       </main>
@@ -855,9 +1068,11 @@ function Hero() {
 function DashboardSummary({
   rolls,
   discards,
+  events,
 }: {
   rolls: Roll[];
   discards: Discard[];
+  events: RollEvent[];
 }) {
   const bySupplier = discards.reduce<Record<string, number>>((acc, item) => {
     acc[item.supplier] = (acc[item.supplier] || 0) + item.totalMeters;
@@ -877,6 +1092,7 @@ function DashboardSummary({
           label="Metros pendientes cambio"
           value={`${discards.reduce((s, d) => s + d.totalMeters, 0)} m`}
         />
+        <Info label="Eventos registrados" value={`${events.length}`} />
       </Card>
       <Card
         title="Ranking proveedor por descartes"
